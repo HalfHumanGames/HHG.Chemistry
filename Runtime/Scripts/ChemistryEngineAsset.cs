@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace HHG.ChemistrySystem.Runtime
+namespace HHG.Chemistry.Runtime
 {
     [CreateAssetMenu(fileName = "Chemistry Engine", menuName = "HHG/Chemistry System/Chemistry Engine")]
     public class ChemistryEngineAsset : ScriptableObject

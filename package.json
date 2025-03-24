@@ -1,13 +1,13 @@
 {
-  "name": "com.halfhumangames.chemistrysystem",
+  "name": "com.halfhumangames.chemistry",
   "version": "1.0.0",
-  "displayName": "HHG - Chemistry System",
+  "displayName": "HHG - Chemistry",
   "description": "Chemistry system for Unity",
   "unity": "2020.3",
   "unityRelease": "6f1",
-  "documentationUrl": "https://github.com/HalfHumanGames/HHG.ChemistrySystem/blob/main/README.md",
-  "changelogUrl": "https://github.com/HalfHumanGames/HHG.ChemistrySystem/blob/main/CHANGELOG.md",
-  "licensesUrl": "https://github.com/HalfHumanGames/HHG.ChemistrySystem/blob/main/LICENSE",
+  "documentationUrl": "https://github.com/HalfHumanGames/HHG.Chemistry/blob/main/README.md",
+  "changelogUrl": "https://github.com/HalfHumanGames/HHG.Chemistry/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/HalfHumanGames/HHG.Chemistry/blob/main/LICENSE",
   "keywords": [
     "Chemistry",
     "Element"

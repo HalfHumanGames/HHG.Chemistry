@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace HHG.ChemistrySystem.Runtime
+namespace HHG.Chemistry.Runtime
 {
     [Serializable]
     public class ChemistryInteraction
