@@ -1,10 +1,11 @@
+using HHG.Common.Runtime;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace HHG.Chemistry.Runtime
 {
     [System.Serializable]
-    public class ChemicalProfile : MonoBehaviour
+    public class ChemicalProfile
     {
         public IReadOnlyCollection<ChemicalTag> ActiveTags => activeTags;
         public SerializedDictionary<string, float> Properties => properties;
@@ -16,11 +17,13 @@ namespace HHG.Chemistry.Runtime
         [SerializeField] private List<ChemicalTag> initialTags = new List<ChemicalTag>();
         [SerializeField] private SerializedDictionary<string, float> properties = new SerializedDictionary<string, float>();
 
-        private HashSet<ChemicalTag> activeTags;
+        private HashSet<ChemicalTag> _activeTags;
+        private HashSet<ChemicalTag> activeTags => _activeTags ??= new HashSet<ChemicalTag>(initialTags);
 
-        private void Awake()
+        public ChemicalProfile(IEnumerable<ChemicalTag> initialTags = null, IDictionary<string, float> properties = null)
         {
-            activeTags = new HashSet<ChemicalTag>(initialTags);
+            if (initialTags != null) this.initialTags.AddRange(initialTags);
+            if (properties != null) this.properties.AddRange(properties);
         }
 
         public bool HasTag(ChemicalTag tag)
@@ -53,9 +56,19 @@ namespace HHG.Chemistry.Runtime
             if (activeTags.Add(tag)) OnTagAdded?.Invoke(tag);
         }
 
+        public void AddTags(IEnumerable<ChemicalTag> tags)
+        {
+            foreach(ChemicalTag tag in tags) AddTag(tag);
+        }
+
         public void RemoveTag(ChemicalTag tag)
         {
             if (activeTags.Remove(tag)) OnTagRemoved?.Invoke(tag);
+        }
+
+        public void RemoveTags(IEnumerable<ChemicalTag> tags)
+        {
+            foreach (ChemicalTag tag in tags) RemoveTag(tag);
         }
 
         public bool TryGetProperty(string property, out float value)

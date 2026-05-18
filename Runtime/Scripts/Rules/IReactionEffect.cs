@@ -4,12 +4,12 @@ namespace HHG.Chemistry.Runtime
 {
     public interface IReactionEffect
     {
-        public EffectTarget Target { get; }
+        public EffectTarget Target => EffectTarget.None;
 
-        public void Apply(ChemicalProfile profile);
+        public void Apply(ChemicalProfile profile) { }
     }
 
-    public enum EffectTarget { Initiator, Receiver, Both }
+    public enum EffectTarget { None, Initiator, Receiver, Both }
 
     [System.Serializable]
     public class AddTagEffect : IReactionEffect
