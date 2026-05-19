@@ -42,8 +42,7 @@ namespace HHG.Chemistry.Runtime
 
         public bool Evaluate(ChemicalProfile profile)
         {
-            float value = profile.GetProperty(property);
-            return op.Evaluate(value, threshold);
+            return profile.TryGetProperty(property, out float value) ? op.Evaluate(value, threshold) : false;
         }
     }
 }

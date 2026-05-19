@@ -1,5 +1,6 @@
 using HHG.Common.Runtime;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace HHG.Chemistry.Runtime
@@ -7,68 +8,73 @@ namespace HHG.Chemistry.Runtime
     [System.Serializable]
     public class ChemicalProfile
     {
-        public IReadOnlyCollection<ChemicalTag> ActiveTags => activeTags;
+        public object Data { get; set; }
+        public IReadOnlyCollection<ChemicalTag> Tags => tags;
         public SerializedDictionary<string, float> Properties => properties;
 
         public event System.Action<ChemicalTag> OnTagAdded;
         public event System.Action<ChemicalTag> OnTagRemoved;
         public event System.Action<string, float> OnPropertyChanged;
+        public event System.Action<string, float> OnPropertyAdded;
+        public event System.Action<string> OnPropertyRemoved;
 
-        [SerializeField] private List<ChemicalTag> initialTags = new List<ChemicalTag>();
+        [SerializeField] private List<ChemicalTag> tags = new List<ChemicalTag>();
         [SerializeField] private SerializedDictionary<string, float> properties = new SerializedDictionary<string, float>();
 
-        private HashSet<ChemicalTag> _activeTags;
-        private HashSet<ChemicalTag> activeTags => _activeTags ??= new HashSet<ChemicalTag>(initialTags);
-
-        public ChemicalProfile(IEnumerable<ChemicalTag> initialTags = null, IDictionary<string, float> properties = null)
+        public ChemicalProfile(IDictionary<string, float> properties) : this(null, null, properties)
         {
-            if (initialTags != null) this.initialTags.AddRange(initialTags);
+
+        }
+
+        public ChemicalProfile(IEnumerable<ChemicalTag> tags, IDictionary<string, float> properties = null) : this(null, tags, properties)
+        {
+            
+        }
+
+        public ChemicalProfile(object data = null, IEnumerable<ChemicalTag> tags = null, IDictionary<string, float> properties = null)
+        {
+            Data = data;
+            if (tags != null) this.tags.AddRange(tags.Distinct());
             if (properties != null) this.properties.AddRange(properties);
         }
 
-        public bool HasTag(ChemicalTag tag)
+        public bool HasTag(ChemicalTag tagToCheck)
         {
-            return activeTags.Contains(tag);
+            return tags.Contains(tagToCheck);
         }
 
-        public bool HasAllTags(IEnumerable<ChemicalTag> tags)
+        public bool HasAllTags(IEnumerable<ChemicalTag> tagsToCheck)
         {
-            foreach (ChemicalTag tag in tags)
+            return tagsToCheck.All(tags.Contains);
+        }
+
+        public bool HasAnyTag(IEnumerable<ChemicalTag> tagsToCheck)
+        {
+            return tagsToCheck.Any(tags.Contains);
+        }
+
+        public void AddTag(ChemicalTag tagToAdd)
+        {
+            if (!tags.Contains(tagToAdd))
             {
-                if (!activeTags.Contains(tag)) return false;
+                tags.Add(tagToAdd);
+                OnTagAdded?.Invoke(tagToAdd);
             }
-
-            return true;
         }
 
-        public bool HasAnyTag(IEnumerable<ChemicalTag> tags)
+        public void AddTags(IEnumerable<ChemicalTag> tagsToAdd)
         {
-            foreach (ChemicalTag tag in tags)
-            {
-                if (activeTags.Contains(tag)) return true;
-            }
-
-            return false;
+            foreach(ChemicalTag tagToAdd in tagsToAdd) AddTag(tagToAdd);
         }
 
-        public void AddTag(ChemicalTag tag)
+        public void RemoveTag(ChemicalTag tagToRemove)
         {
-            if (activeTags.Add(tag)) OnTagAdded?.Invoke(tag);
+            if (tags.Remove(tagToRemove)) OnTagRemoved?.Invoke(tagToRemove);
         }
 
-        public void AddTags(IEnumerable<ChemicalTag> tags)
+        public void RemoveTags(IEnumerable<ChemicalTag> tagsToRemove)
         {
-            foreach(ChemicalTag tag in tags) AddTag(tag);
-        }
-
-        public void RemoveTag(ChemicalTag tag)
-        {
-            if (activeTags.Remove(tag)) OnTagRemoved?.Invoke(tag);
-        }
-
-        public void RemoveTags(IEnumerable<ChemicalTag> tags)
-        {
-            foreach (ChemicalTag tag in tags) RemoveTag(tag);
+            foreach (ChemicalTag tagToRemove in tagsToRemove) RemoveTag(tagToRemove);
         }
 
         public bool TryGetProperty(string property, out float value)
@@ -83,8 +89,25 @@ namespace HHG.Chemistry.Runtime
 
         public void SetProperty(string property, float value)
         {
-            properties[property] = value;
-            OnPropertyChanged?.Invoke(property, value);
+            if (properties.TryAdd(property, value))
+            {
+                OnPropertyAdded?.Invoke(property, value);
+            }
+            else
+            {
+                properties[property] = value;
+                OnPropertyChanged?.Invoke(property, value);
+            }
+        }
+
+        public void RemoveProperty(string property)
+        {
+            if (properties.Remove(property)) OnPropertyRemoved?.Invoke(property);
+        }
+
+        public void RemoveProperties(IEnumerable<string> properties)
+        {
+            foreach(string property in properties) RemoveProperty(property);
         }
 
         public bool HasProperty(string property)
